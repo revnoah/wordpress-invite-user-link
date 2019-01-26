@@ -1,0 +1,32 @@
+{
+  "name": "wordpress-invite-user-link",
+  "version": "1.0.0",
+  "description": "WordPress plugin to generate and handle a user invitation to be a user of the website.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-notify": "^3.2.0",
+    "gulp-zip": "^4.2.0"
+  },
+  "scripts": {
+    "build": "phpcs && gulp",
+    "test": "phpcs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/revnoah/wordpress-invite-user-link.git"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "photo",
+    "album"
+  ],
+  "author": "Noah J. Stewart",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/revnoah/wordpress-invite-user-link/issues"
+  },
+  "homepage": "https://github.com/revnoah/wordpress-invite-user-link#readme"
+}
