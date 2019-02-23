@@ -25,8 +25,12 @@ var testPath = '../wptest/wp-content/plugins';
 var sourcePath = 'source';
 var buildPath = 'build';
 var fileName = 'invite-user-link';
+var publishPath = '../publish-' + fileName;
 
-gulp.task('zippy', function() {
+/**
+ * create zip file based on source
+ */
+gulp.task('zippy', async function() {
   gulp.src(sourcePath + '/**')
     .pipe(zip(fileName + '.zip', {
       createSubFolders: true
@@ -35,19 +39,45 @@ gulp.task('zippy', function() {
     .pipe(notify({ title: "Gulp!", message: "WordPress plugin zipped" }));
 });
 
-gulp.task('copy', function () {
+/**
+ * copy all source files and license
+ */
+gulp.task('copy', async function () {
   gulp.src(sourcePath + '/**')
     .pipe(gulp.dest(buildPath + '/' + fileName + '/'));
 });
 
-gulp.task('test', function () {
+/**
+ * copy all of source over to test path in subfolder
+ */
+gulp.task('test', async function () {
   gulp.src(sourcePath + '/**')
-    .pipe(gulp.dest(testPath + '/' + fileName + '/'))
-    .pipe(notify({ title: "Gulp Watch", message: "WordPress test site updated" }));
+    .pipe(gulp.dest(testPath + '/' + fileName + '/'));
 });
 
+/**
+ * publish task to output to WordPress plugin SVN repository
+ */
+gulp.task('publish', async function () {
+  gulp.src(sourcePath + '/readme.txt')
+    .pipe(gulp.dest(publishPath + '/trunk/'));
+  gulp.src(sourcePath + '/assets/**')
+    .pipe(gulp.dest(publishPath + '/assets/'));
+  gulp.src(sourcePath + '/includes')
+    .pipe(gulp.dest(publishPath + '/trunk/'));
+  gulp.src(sourcePath + '/*.php')
+    .pipe(gulp.dest(publishPath + '/trunk/'))
+    .pipe(notify({ title: "Gulp - Publish", message: "WordPress plugin SVN directory updated" }));
+});
+
+/**
+ * default gulp task
+ */
 gulp.task('default', gulp.series('zippy', 'copy'));
 
-gulp.task('watch', function() {
-  gulp.watch(sourcePath + '/**/*.php', gulp.series('test'));
+/**
+ * watch php files and process scripts
+ */
+gulp.task('watch', async function() {
+  gulp.watch(sourcePath + '/**/*.php', gulp.series('test', 'copy'));
 });

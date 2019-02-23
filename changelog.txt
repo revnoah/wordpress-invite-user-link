@@ -1,5 +1,5 @@
-1.0.0   01-26-2019
+= 1.0.1 =
+* bug fixes and minor updates to create db
 
-- Initial commit
-
-
+= 1.0.0 =
+* Initial commit
