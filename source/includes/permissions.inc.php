@@ -3,7 +3,6 @@
 /**
  * Get permissions to view invite statement
  *
- * @param array  $invite invite statement object
  * @param string $slug Unique slug
  * @return boolean
  */
@@ -26,12 +25,6 @@ function invite_user_link_get_permissions($slug) {
 	$invite = $wpdb->get_row(
 		$wpdb->prepare($sql, $current_user->ID)
 	);
-
-	/*
-	echo 'checked user ' , $current_user->ID;
-	print_r($invite);
-	die;
-	*/
 
 	$sql = "SELECT * FROM {$wpdb->prefix}invite_user_links WHERE slug = %s";
 	$invite = $wpdb->get_row(

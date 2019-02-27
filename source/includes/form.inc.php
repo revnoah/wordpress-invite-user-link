@@ -51,7 +51,7 @@ function invite_user_link_get_formatted_field($setting): string {
  * @param array $setting Array element from settings
  * @return string
  */
-function invite_user_link_get_field($setting): string {
+function invite_user_link_get_field(array $setting): string {
 	$output = '';
 
 	if ($setting['type'] === 'heading') {
@@ -70,22 +70,57 @@ function invite_user_link_get_field($setting): string {
 }
 
 /**
+ * Get form open
+ *
+ * @param string $id
+ * @param array $hidden_vars
+ * @param string $action
+ * @return string
+ */
+function invite_user_link_get_form_open(string $id = '', array $hidden_vars = [], string $action = 'index.php'): string {
+	$output = '<form method="post" action="' . $action . '"';
+	if ($id !== '') {
+		$output .= ' id="' . $id . '"';
+	}
+	$output .= '>' . "\n";
+
+	if (count($hidden_vars)) {
+		foreach($hidden_vars as $key => $hidden_var) {
+			$output .= '<input type="hidden" name="' . $key . '" value="' . $hidden_var . '" />' . "\n";
+		}
+	}
+
+	return $output;
+}
+
+/**
+ * Get form close
+ *
+ * @return string
+ */
+function invite_user_link_get_form_close(): string {
+	$output = '</form>';
+
+	return $output;
+}
+
+/**
  * Get table header with optional header row
  *
  * @param array $rows
  * @return string
  */
-function invite_user_link_get_table_header($rows = []): string {
+function invite_user_link_get_table_header(array $rows = []): string {
 	//open table element
 	$output = '<table class="form-table">';
 
 	//output header row if provided
 	if (count($rows) > 0) {
-		$output .= '<tr>';
+		$output .= '<thead><tr>';
 		foreach ($rows as $row) {
 			$output .= '<th>' . $row . '</th>';
 		}
-		$output .= '</tr>';
+		$output .= '</tr></thead>';
 	}
 
 	return $output;
@@ -194,9 +229,13 @@ function invite_user_link_get_number($setting): string {
 		. '" name="' . $setting['id'] 
 		. '" class="form-control"';
 	$output .= invite_user_link_get_data($setting);
-	$output .= ' min="0"';
-	$output .= ' value="' . $setting['saved'] 
-		. '" />';
+
+	//set min option if provided
+	if (isset($setting['min'])) {
+		$output .= ' min="' . $setting['min'] . '"';
+	}
+
+	$output .= ' value="' . $setting['saved'] . '" />';
 
 	return $output;
 }

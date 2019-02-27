@@ -10,16 +10,14 @@ function invite_user_link_settings_defaults() {
 		[
 			'id' => 'invite_user_link_require_email_address',
 			'label' => __('Require Email Address'),
-			'type' => 'boolean',
-			'default' => false
-		], [
-			'id' => 'invite_user_link_require_email_verification',
-			'label' => __('Require Email Verification'),
+			'description' => __('Require that a user provide a valid email address'),
 			'type' => 'boolean',
 			'default' => false
 		], [
 			'id' => 'invite_user_link_require_approval',
 			'label' => __('Require Approval'),
+			'description' => 
+				__('Completed user accounts need to be approved before they can be used.'),
 			'type' => 'boolean',
 			'default' => false
 		]
@@ -105,7 +103,6 @@ function invite_user_link_admin() {
 		<?php settings_fields($settings['kabob'] . '-settings-group'); ?>
 		<?php do_settings_sections($settings['kabob'] . '-settings-group'); ?>
 		<?php
-
 			echo invite_user_link_get_table_header();
 
 			foreach ($settings['settings'] as $setting) {

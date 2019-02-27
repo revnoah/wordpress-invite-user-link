@@ -1,4 +1,4 @@
-<form action="<?php esc_url( admin_url('admin-post.php') ); ?>" method="post">
+<form action="<?php esc_url( admin_url('index.php') ); ?>" method="post">
   <div class="form-group">
     <label for="slug"><?php __('Registration Code') ?></label>
     <input type="text" name="slug" class="form-control" 
@@ -26,4 +26,3 @@
     <button type="submit" class="btn btn-primary"><?php __('Sign Up') ?></button>
   </div>
 </form>
-

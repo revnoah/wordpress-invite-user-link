@@ -15,3 +15,28 @@ function invite_user_link_load_css($template_name) {
 		);
 	}
 }
+
+function invite_user_link_get_template_part($template_name, $template_folder = 'template_parts') {
+	//plugin dir is defined in root file
+	$plugin_dir = plugin_dir_path(PLUGIN_DIR);
+
+    $new_template = locate_template($template_name);
+    if($new_template == '' && $template_name != '') {
+
+		echo 'template is set';
+
+		load_template($filename);
+		get_template_part($template_folder . '/content', $template_name);
+        //include plugin_dir_path( __FILE__ ) . 'templates/' . $template_name;
+        //exit;
+    } elseif($new_template !== '') {
+
+		echo 'loading from plugins';
+
+		//filename of plugin template part
+		$filename = $plugin_dir . 'template_parts/content-' . $template_name . '.php';
+		load_template($filename);
+        //include $new_template;
+        //exit;
+    }
+}

@@ -7,11 +7,14 @@
 /*
 Plugin Name: Invite User Link
 Plugin URI: http://noahjstewart.com/
-Description: Plugin to manage and share private photo albums
+Description: Plugin to create a placeholder user and signup link for the user to finish adding their info
 Author: Noah Stewart
 Version: 1.0.1
 Author URI: http://noahjstewart.com/
 */
+
+//define constants for plugin
+define("PLUGIN_DIR", __FILE__);
 
 //load required includes
 require_once realpath(__DIR__) . '/includes/helpers.inc.php';
@@ -21,42 +24,40 @@ require_once realpath(__DIR__) . '/includes/admin.inc.php';
 require_once realpath(__DIR__) . '/includes/invite.inc.php';
 require_once realpath(__DIR__) . '/includes/permissions.inc.php';
 
-//register rewrite hook
-register_activation_hook(__FILE__, 'invite_user_link_rewrite_activation');
-register_activation_hook(__FILE__, 'invite_user_link_create_db');
-register_deactivation_hook(__FILE__, 'invite_user_link_rewrite_activation');
+
+add_action( 'init', 'invite_user_link_rewrite_add_rewrites' );
 
 /**
- * Handle rewrite rules
- *
- * @return void
- */
-function invite_user_link_rewrite_activation() {
-  invite_user_link_rewrite_add_rewrites();
-	flush_rewrite_rules();
-}
-
-/**
- * Load rewrite
- */
-add_action('init', 'invite_user_link_rewrite_add_rewrites');
-
-/**
- * Set new rewrite rules for invites
+ * Add rewrites
  *
  * @return void
  */
 function invite_user_link_rewrite_add_rewrites() {
-	add_rewrite_rule(
-		'^invite/?([^/]*)',
-		'index.php?pagename=invite&code=$matches[1]',
-		'top'
-	);
+  add_rewrite_rule(
+	  '^invite-user-link/?([^/]*)',
+	  'index.php?pagename=invite-user-link&code=$matches[1]',
+	  'top'
+  );
 }
 
 /**
- * filter for query vars passed to index.php
+ * Activation/deactivation hooks
  */
+register_activation_hook( __FILE__, 'invite_user_link_rewrite_activation' );
+register_activation_hook( __FILE__, 'invite_user_link_create_db' );
+register_deactivation_hook( __FILE__, 'invite_user_link_rewrite_activation' );
+
+/**
+ * Apply rewrite rules
+ *
+ * @return void
+ */
+function invite_user_link_rewrite_activation() {
+	invite_user_link_rewrite_add_rewrites();
+	flush_rewrite_rules();
+}
+
+//filter for query vars passed to index.php
 add_filter('query_vars', 'invite_user_link_query_vars');
 
 /**
@@ -66,14 +67,11 @@ add_filter('query_vars', 'invite_user_link_query_vars');
  * @return array
  */
 function invite_user_link_query_vars($vars) {
-	$vars[] = 'code';
+  $vars[] = 'code';
 
-	return $vars;
+  return $vars;
 }
-  
-/**
- * Add endpoint
- */
+
 add_action('init', 'invite_user_link_add_endpoints');
 
 /**
@@ -82,21 +80,56 @@ add_action('init', 'invite_user_link_add_endpoints');
  * @return void
  */
 function invite_user_link_add_endpoints() {
-	add_rewrite_endpoint('invite', EP_PAGES);
+	add_rewrite_endpoint('vision-statement', EP_PAGES);
 }
 
 // load custom template, generate image and redirect based on query vars
 add_action('template_redirect', 'invite_user_link_catch_vars');
+
+/**
+ * Core page functionality
+ *
+ * @return void
+ */
 function invite_user_link_catch_vars() {
 	global $wpdb, $wp_query;
+	$current_user = wp_get_current_user();
+	$template_file = '';
 	session_start();
 
-	$pagename = get_query_var('pagename');
-	$code = get_query_var('code');
+	//current user is logged in, redirect
+	if ($current_user->ID > 0) {
+		//TODO: handle logged in user with message and redirect
+		echo 'User is logged in';
 
-	if ($pagename !== 'invite') {
 		return;
 	}
 
-	echo 'Invite!!';
+	$pagename = get_query_var('pagename');
+	$code = get_query_var('code');
+	$action = isset($_GET['action']) ? $_GET['action'] : '';
+	$name = isset($_POST['name']) ? $_POST['name'] : '';
+	$email = isset($_POST['email']) ? $_POST['email'] : '';
+	$password = isset($_POST['password']) ? $_POST['password'] : '';
+	$password2 = isset($_POST['password2']) ? $_POST['password2'] : '';
+
+	if ($pagename !== 'invite-user-link') {
+		return;
+	}
+
+	if ($code !== '') {
+		echo $code;
+
+		$template_file = 'page-invite-user-link.php';
+	}
+
+	$new_template = locate_template($template_file);
+	if($new_template == '' && $template_file != '') {
+		include plugin_dir_path( __FILE__ ) . 'templates/' . $template_file;
+		exit;
+	} elseif($new_template !== '') {
+		include $new_template;
+		exit;
+	}
 }
+
