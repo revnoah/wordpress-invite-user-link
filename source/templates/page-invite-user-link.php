@@ -20,7 +20,7 @@ get_header(); ?>
 
 		<?php
 			// Include the page content template.
-			invite_user_link_load_template('invite-user-link');
+			invite_user_link_get_template_part('invite-user-link');
 		?>
 
 	</main><!-- .site-main -->
