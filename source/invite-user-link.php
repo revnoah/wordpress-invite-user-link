@@ -7,7 +7,7 @@
 /*
 Plugin Name: Invite User Link
 Plugin URI: http://noahjstewart.com/
-Description: Plugin to create a placeholder user and signup link for the user to finish adding their info
+Description: Plugin to create placeholder users and signup links for the users to finish adding their info
 Author: Noah Stewart
 Version: 1.0.1
 Author URI: http://noahjstewart.com/
@@ -39,6 +39,31 @@ function invite_user_link_rewrite_add_rewrites() {
 	  'top'
   );
 }
+
+/*
+function invite_user_link_redirect_page_template ($template) {
+	if ('my-custom-template.php' == basename ($template))
+		$template = WP_PLUGIN_DIR . '/mypluginname/my-custom-template.php';
+	return $template;
+}
+add_filter ('page_template', 'invite_user_link_redirect_page_template');
+*/
+
+/*
+add_action( 'init', 'wpse26388_rewrites_init' );
+function wpse26388_rewrites_init(){
+	add_rewrite_rule(
+		'properties/([0-9]+)/?$',
+		'index.php?pagename=properties&property_id=$matches[1]',
+		'top' );
+}
+
+add_filter( 'query_vars', 'wpse26388_query_vars' );
+function wpse26388_query_vars( $query_vars ){
+	$query_vars[] = 'property_id';
+	return $query_vars;
+}
+*/
 
 /**
  * Activation/deactivation hooks

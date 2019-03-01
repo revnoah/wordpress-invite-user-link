@@ -23,7 +23,10 @@ function invite_user_link_load_css($template_name) {
  * @param string $template_folder Name of folder to search
  * @return void
  */
-function invite_user_link_get_template_part(string $template_name, string $template_folder = 'template_parts'): void {
+function invite_user_link_get_template_part(
+		string $template_name, 
+		string $template_folder = 'template_parts'
+	): void {
 	//plugin dir is defined in root file
 	$plugin_dir = plugin_dir_path(PLUGIN_DIR);
 

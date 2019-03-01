@@ -28,7 +28,8 @@ function invite_user_link_invite_fields() {
 		], [
 			'id' => 'invite_user_link_number_users',
 			'label' => __('Hours Until Expiry'),
-			'description' => __('The number of hours until a user account is cancelled. Set zero for none.'),
+			'description' => __('The number of hours until a user account 
+				is cancelled. Set zero for none.'),
 			'type' => 'number',
 			'default' => '0',
 			'min' => '0'
@@ -85,7 +86,10 @@ function invite_user_link_invite() {
 	$output = '<div class="wrap">';
 	$output .= '<h1>' . $settings['label'] . '</h1>';
 
-	$output .= invite_user_link_get_form_open($settings['id'], $settings['hidden_vars']);
+	$output .= invite_user_link_get_form_open(
+		$settings['id'], 
+		$settings['hidden_vars']
+	);
 	$output .= invite_user_link_get_table_header();
 	foreach ($settings['settings'] as $setting) {
 		$setting['saved'] = $setting['default'];
