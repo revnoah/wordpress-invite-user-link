@@ -15,6 +15,7 @@ Author URI: http://noahjstewart.com/
 
 //define constants for plugin
 define("PLUGIN_DIR", __FILE__);
+define("PAGENAME", 'invite-user-link');
 
 //load required includes
 require_once realpath(__DIR__) . '/includes/helpers.inc.php';
@@ -34,20 +35,32 @@ add_action( 'init', 'invite_user_link_rewrite_add_rewrites' );
  */
 function invite_user_link_rewrite_add_rewrites() {
   add_rewrite_rule(
-	  '^invite-user-link/?([^/]*)',
-	  'index.php?pagename=invite-user-link&code=$matches[1]',
+	  '^' . PAGENAME . '/?([^/]*)',
+	  'index.php?pagename=' . PAGENAME . '&slug=$matches[1]',
 	  'top'
   );
 }
 
-/*
-function invite_user_link_redirect_page_template ($template) {
-	if ('my-custom-template.php' == basename ($template))
-		$template = WP_PLUGIN_DIR . '/mypluginname/my-custom-template.php';
+/**
+ * Redirect page template
+ *
+ * @param [type] $template
+ * @return void
+ */
+function invite_user_link_redirect_page_template($template) {
+	$template_name = 'page- ' . PAGENAME . '.php';
+
+	if ($template_name == basename ($template)) {
+		$template = PLUGIN_DIR . '/templates/' . $template_name;
+	}
+
 	return $template;
 }
+
+/**
+ * add page template filter
+ */
 add_filter ('page_template', 'invite_user_link_redirect_page_template');
-*/
 
 /*
 add_action( 'init', 'wpse26388_rewrites_init' );
@@ -92,7 +105,7 @@ add_filter('query_vars', 'invite_user_link_query_vars');
  * @return array
  */
 function invite_user_link_query_vars($vars) {
-  $vars[] = 'code';
+  $vars[] = 'slug';
 
   return $vars;
 }
@@ -131,7 +144,7 @@ function invite_user_link_catch_vars() {
 	}
 
 	$pagename = get_query_var('pagename');
-	$code = get_query_var('code');
+	$slug = get_query_var('slug');
 	$action = isset($_GET['action']) ? $_GET['action'] : '';
 	$name = isset($_POST['name']) ? $_POST['name'] : '';
 	$email = isset($_POST['email']) ? $_POST['email'] : '';
@@ -142,12 +155,13 @@ function invite_user_link_catch_vars() {
 		return;
 	}
 
-	if ($code !== '') {
-		echo $code;
+	if ($slug !== '') {
+		echo $slug;
 
 		$template_file = 'page-invite-user-link.php';
 	}
 
+	/*
 	$new_template = locate_template($template_file);
 	if($new_template == '' && $template_file != '') {
 		include plugin_dir_path( __FILE__ ) . 'templates/' . $template_file;
@@ -156,5 +170,6 @@ function invite_user_link_catch_vars() {
 		include $new_template;
 		exit;
 	}
+	*/
 }
 

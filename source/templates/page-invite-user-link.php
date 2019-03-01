@@ -16,12 +16,21 @@ get_header(); ?>
 <div id="primary" class="content-area">
 	<main id="main" class="site-main" role="main">
 
-    PLUGIN PAGE
-
-		<?php
-			// Include the page content template.
-			invite_user_link_get_template_part('invite-user-link');
-		?>
+    <div>
+			<header>
+				<h1 class="page-title">Finish Signup</h1>
+			</header>
+			<div class="page-content">
+				<p class="description text-muted">
+					Your account is almost ready to go. Just finish filling out this 
+					info to get started.
+				</p>
+				<?php
+					// Include the page content template.
+					invite_user_link_get_template_part('invite-user-link');
+				?>
+			</div>
+		</div>
 
 	</main><!-- .site-main -->
 </div><!-- .content-area -->

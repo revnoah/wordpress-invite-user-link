@@ -32,9 +32,6 @@ function invite_user_link_get_template_part(
 
 	$new_template = locate_template($template_name);
 	if ($new_template == '' && $template_name != '') {
-
-		echo 'template is set';
-
 		load_template($filename);
 		get_template_part($template_folder . '/content', $template_name);
 		//include plugin_dir_path( __FILE__ ) . 'templates/' . $template_name;
