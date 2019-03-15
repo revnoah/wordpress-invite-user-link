@@ -14,12 +14,13 @@ Author URI: http://noahjstewart.com/
 */
 
 //define constants for plugin
-define("PLUGIN_DIR", __FILE__);
+define("PLUGIN_DIR", __DIR__);
 define("PAGENAME", 'invite-user-link');
 
 //load required includes
 require_once realpath(__DIR__) . '/includes/helpers.inc.php';
 require_once realpath(__DIR__) . '/includes/createdb.inc.php';
+require_once realpath(__DIR__) . '/includes/validate.inc.php';
 require_once realpath(__DIR__) . '/includes/form.inc.php';
 require_once realpath(__DIR__) . '/includes/admin.inc.php';
 require_once realpath(__DIR__) . '/includes/invite.inc.php';
@@ -41,6 +42,8 @@ function invite_user_link_rewrite_add_rewrites() {
   );
 }
 
+//TODO: review and possibly remove this function and filter
+//created: invite_user_link_locate_template
 /**
  * Redirect page template
  *
@@ -50,7 +53,7 @@ function invite_user_link_rewrite_add_rewrites() {
 function invite_user_link_redirect_page_template($template) {
 	$template_name = 'page- ' . PAGENAME . '.php';
 
-	if ($template_name == basename ($template)) {
+	if ($template_name == basename($template)) {
 		$template = PLUGIN_DIR . '/templates/' . $template_name;
 	}
 
@@ -110,17 +113,6 @@ function invite_user_link_query_vars($vars) {
   return $vars;
 }
 
-add_action('init', 'invite_user_link_add_endpoints');
-
-/**
- * Manage endpoints
- *
- * @return void
- */
-function invite_user_link_add_endpoints() {
-	add_rewrite_endpoint('vision-statement', EP_PAGES);
-}
-
 // load custom template, generate image and redirect based on query vars
 add_action('template_redirect', 'invite_user_link_catch_vars');
 
@@ -136,7 +128,7 @@ function invite_user_link_catch_vars() {
 	session_start();
 
 	//current user is logged in, redirect
-	if ($current_user->ID > 0) {
+	if ($current_user->ID > 0 && true == false) {
 		//TODO: handle logged in user with message and redirect
 		echo 'User is logged in';
 
@@ -145,31 +137,23 @@ function invite_user_link_catch_vars() {
 
 	$pagename = get_query_var('pagename');
 	$slug = get_query_var('slug');
-	$action = isset($_GET['action']) ? $_GET['action'] : '';
-	$name = isset($_POST['name']) ? $_POST['name'] : '';
-	$email = isset($_POST['email']) ? $_POST['email'] : '';
-	$password = isset($_POST['password']) ? $_POST['password'] : '';
-	$password2 = isset($_POST['password2']) ? $_POST['password2'] : '';
 
-	if ($pagename !== 'invite-user-link') {
+	if ($pagename !== PAGENAME) {
 		return;
 	}
 
-	if ($slug !== '') {
-		echo $slug;
+	//TODO: handle multiple routes, actions or pagenames
+	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		//get defined keys from post and finish signup with data
+		$keys = ['name', 'email', 'password', 'password2'];
+		$account = invite_user_link_get_request_vars($keys, 'POST');
 
-		$template_file = 'page-invite-user-link.php';
+		//finish signup with supplied fields
+		invite_user_link_finish_signup($slug, $account);
+	} else {
+		//$template_path = invite_user_link_redirect_page_template($template_file);		
+		$template_name = 'page-' . PAGENAME . '.php';
+		$template_path = invite_user_link_locate_template([$template_name], true);
 	}
-
-	/*
-	$new_template = locate_template($template_file);
-	if($new_template == '' && $template_file != '') {
-		include plugin_dir_path( __FILE__ ) . 'templates/' . $template_file;
-		exit;
-	} elseif($new_template !== '') {
-		include $new_template;
-		exit;
-	}
-	*/
 }
 

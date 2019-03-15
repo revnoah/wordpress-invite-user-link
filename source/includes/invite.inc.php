@@ -103,3 +103,21 @@ function invite_user_link_invite() {
 
 	echo $output;
 }
+
+function invite_user_link_finish_signup(string $slug, array $fields): bool {
+	//get user and invite related to the slug
+	global $wpdb;
+	$table_prefix = $wpdb->prefix;
+	$table_invitations = $table_prefix . 'invite_user_links';
+	$table_invitation_users = $table_prefix . 'invite_user_link_users';
+	$query = "SELECT * FROM $table_invitations WHERE slug = %s";
+	$invitations = $wpdb->get_results($query, [$slug]);
+	echo 'invitations: ';
+	print_r($invitations);
+
+	//TODO: finish validation
+	//validate the field data
+	$valid = invite_user_link_validate_email($fields['email']);
+	$valid = invite_user_link_validate_email($fields['password'], $fields['password2']);
+	
+}

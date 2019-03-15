@@ -80,9 +80,9 @@ function invite_user_link_get_field(array $setting): string {
 function invite_user_link_get_form_open(
 	string $id = '', 
 	array $hidden_vars = [], 
-	string $action = 'index.php'
+	string $action = 'invite-user-link'
 	): string {
-	$output = '<form method="post" action="' . $action . '"';
+	$output = '<form method="post" action="' . site_url($action) . '"';
 	if ($id !== '') {
 		$output .= ' id="' . $id . '"';
 	}

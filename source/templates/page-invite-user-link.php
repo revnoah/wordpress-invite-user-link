@@ -16,21 +16,21 @@ get_header(); ?>
 <div id="primary" class="content-area">
 	<main id="main" class="site-main" role="main">
 
-    <div>
-			<header>
-				<h1 class="page-title">Finish Signup</h1>
+    <article class="post type-post status-publish format-standard hentry category-uncategorized entry">
+			<header class="entry-header">
+				<h2 class="entry-title">Finish Signup</h2>
 			</header>
-			<div class="page-content">
+			<div class="entry-content">
 				<p class="description text-muted">
 					Your account is almost ready to go. Just finish filling out this 
 					info to get started.
 				</p>
 				<?php
 					// Include the page content template.
-					invite_user_link_get_template_part('invite-user-link');
+					invite_user_link_get_template_part('invite-user-link', 'content');
 				?>
 			</div>
-		</div>
+		</article>
 
 	</main><!-- .site-main -->
 </div><!-- .content-area -->
