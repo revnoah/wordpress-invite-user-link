@@ -151,6 +151,10 @@ function invite_user_link_catch_vars() {
 		//finish signup with supplied fields
 		invite_user_link_finish_signup($slug, $account);
 	} else {
+		//load variables to pass into template
+		global $settings;
+		$settings = invite_user_link_settings_saved();
+
 		//$template_path = invite_user_link_redirect_page_template($template_file);		
 		$template_name = 'page-' . PAGENAME . '.php';
 		$template_path = invite_user_link_locate_template([$template_name], true);

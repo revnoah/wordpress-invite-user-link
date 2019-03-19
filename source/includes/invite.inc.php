@@ -58,7 +58,7 @@ add_action('admin_menu', 'invite_user_link_users_menu');
  *
  * @return void
  */
-function invite_user_link_users_menu() {
+function invite_user_link_users_menu(): void {
 	$settings = invite_user_link_invite_fields();
 
 	add_users_page(
@@ -75,7 +75,7 @@ function invite_user_link_users_menu() {
  *
  * @return void
  */
-function invite_user_link_invite() {
+function invite_user_link_invite(): void {
 	//load user settings
 	$hidden_vars = [
 		'code' => 'code'
@@ -104,20 +104,126 @@ function invite_user_link_invite() {
 	echo $output;
 }
 
+/**
+ * Finish signup with variables passed through, verifying field input
+ *
+ * @param string $slug
+ * @param array $fields
+ * @return boolean
+ */
 function invite_user_link_finish_signup(string $slug, array $fields): bool {
 	//get user and invite related to the slug
 	global $wpdb;
+
+	//table setup
 	$table_prefix = $wpdb->prefix;
 	$table_invitations = $table_prefix . 'invite_user_links';
 	$table_invitation_users = $table_prefix . 'invite_user_link_users';
-	$query = "SELECT * FROM $table_invitations WHERE slug = %s";
-	$invitations = $wpdb->get_results($query, [$slug]);
-	echo 'invitations: ';
-	print_r($invitations);
+	$query = $wpdb->prepare("SELECT * FROM $table_invitations WHERE slug = %s", $slug);
+	$invitations = $wpdb->get_results($query);
 
 	//TODO: finish validation
 	//validate the field data
-	$valid = invite_user_link_validate_email($fields['email']);
-	$valid = invite_user_link_validate_email($fields['password'], $fields['password2']);
+	$validation_errors = invite_user_link_validate_signup($fields);
+	if (count($validation_errors) > 0) {
+		//TODO: implement flash messaging
+		return false;
+	}
 	
+}
+
+/**
+ * Validate input fields based on plugin settings and basic requirements
+ *
+ * @param array $fields The fields to be validated
+ * @return array An array containing the errors with field name and message
+ */
+function invite_user_link_validate_signup(array $fields): array {
+	//load settings
+	$settings = invite_user_link_settings_saved();
+	$min_name = 4;
+	$errors = [];
+
+	if ($settings['invite_user_link_require_email_address'] && !is_email($fields['email'])) {
+		$errors[] = [
+			'field' => 'email',
+			'message' => __('You must provide a valid email address')
+		];
+	}
+
+	if ($setting['invite_user_link_require_name'] && strlen($fields['name']) < $min_name) {
+		$errors[] = [
+			'field' => 'name',
+			'message' => __('You must provide a name with at least ' . $min_name . ' characters')
+		];
+	}	
+
+	if ($setting['invite_user_link_require_password'] && strlen($fields['password']) < $min_name) {
+		$errors[] = [
+			'field' => 'password',
+			'message' => __('You must provide a password with at least ' . $min_name . ' characters')
+		];
+	}	
+
+	if ($setting['invite_user_link_require_password'] && $fields['password'] != $fields['password2']) {
+		$errors[] = [
+			'field' => 'password2',
+			'message' => __('You must type the same password twice')
+		];
+	}	
+
+	if ($fields['slug'] == '') {
+		$errors[] = [
+			'field' => 'slug',
+			'message' => __('You need to provide an invitation code')
+		];
+	}	
+
+	return $errors;
+}
+
+/**
+ * Verify invitation
+ *
+ * @param array $invitation
+ * @return boolean
+ */
+function invite_user_link_verify_invitation(array $invitation): bool {
+	//load settings
+	$settings = invite_user_link_settings_saved();
+
+	//user can not be logged in
+	if (is_user_logged_in()) {
+		return false;
+	}
+
+	//check invitation expiry time
+	if ($invitation->expires) {
+		$expiry_date = strtotime($invitation->expires);
+		if ($expiry_date > time()) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Decrement max_invites
+ *
+ * @param array $invitation
+ * @return boolean
+ */
+function invite_user_link_decrement_invitation(array $invitation): bool {
+	//check max invites
+	if ($invitation->max_invites > 1) {
+		$wpdb->query($wpdb->prepare(
+			"UPDATE $table_invitations SET max_invites = max_invites - 1 WHERE ID = %d", 
+			$invitation->ID
+		));
+
+		return true;
+	}
+
+	return false;
 }

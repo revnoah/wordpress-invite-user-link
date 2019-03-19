@@ -12,6 +12,24 @@ function invite_user_link_settings_defaults() {
 			'label' => __('Require Email Address'),
 			'description' => __('Require that a user provide a valid email address'),
 			'type' => 'boolean',
+			'default' => true
+		], [
+			'id' => 'invite_user_link_require_name',
+			'label' => __('Require Name'),
+			'description' => __('Require that a user provide a name'),
+			'type' => 'boolean',
+			'default' => false
+		], [
+			'id' => 'invite_user_link_require_password',
+			'label' => __('Require Email Address'),
+			'description' => __('Require that a user set a password'),
+			'type' => 'boolean',
+			'default' => true
+		], [
+			'id' => 'invite_user_link_display_code',
+			'label' => __('Display Registration Code'),
+			'description' => __('Registration code will still be passed through url'),
+			'type' => 'boolean',
 			'default' => false
 		], [
 			'id' => 'invite_user_link_require_approval',
@@ -27,11 +45,27 @@ function invite_user_link_settings_defaults() {
 }
 
 /**
+ * Get settings along with saved value
+ *
+ * @return array
+ */
+function invite_user_link_settings_saved(): array {
+	$settings_saved = [];
+	$settings_defaults = invite_user_link_settings_defaults();
+
+	foreach ($settings_defaults as $setting) {
+		$settings_saved[$setting['id']] = get_option($setting['id'], $setting['default']);
+	}
+
+	return $settings_saved;
+}
+
+/**
  * Define settings fields
  *
  * @return array
  */
-function invite_user_link_settings_fields() {
+function invite_user_link_settings_fields(): array {
 	$default_settings = invite_user_link_settings_defaults();
 
 	$settings = [
