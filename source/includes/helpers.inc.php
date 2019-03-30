@@ -113,11 +113,6 @@ function invite_user_link_get_request_vars(array $keys, string $method = 'POST')
 function invite_user_link_update_user(array $fields): bool {
 	$user = [];
 
-	//update user password
-	if ($fields['password']) {
-		$user['user_pass'] = $fields['password'];
-	}
-
 	//update email address
 	if ($fields['email']) {
 		$user['user_email'] = $fields['email'];
@@ -143,5 +138,31 @@ function invite_user_link_update_user(array $fields): bool {
 		return false;
 	}
 
+	//update user with hashed password
+	if ($fields['password']) {
+		invite_user_link_set_hash_password($fields['password'], $fields['ID']);
+	}
+
 	return wp_update_user($fields);
+}
+
+/**
+ * Set password
+ *
+ * @param string $hash_password
+ * @param integer $user_id
+ * @return void
+ */
+function invite_user_link_set_hash_password(string $hash_password, int $user_id): void {
+	global $wpdb;
+	
+	$wpdb->update(
+		$wpdb->users,
+		array(
+			'user_pass'           => $hash_password,
+			'user_activation_key' => '',
+		),
+		array('ID' => $user_id)
+	);
+	wp_cache_delete($user_id, 'users');
 }

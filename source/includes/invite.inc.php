@@ -115,6 +115,9 @@ function invite_user_link_finish_signup(string $slug, array $fields): ?array {
 	//get user and invite related to the slug
 	global $wpdb;
 
+	//load settings
+	$settings = invite_user_link_settings_saved();
+
 	//table setup
 	$table_invitations = $wpdb->prefix . 'invite_user_links';
 	$table_invitation_users = $wpdb->prefix . 'invite_user_link_users';
@@ -134,14 +137,21 @@ function invite_user_link_finish_signup(string $slug, array $fields): ?array {
 	}
 
 	//user id
-	$user = get_user_by('id', $invitations[0]['user_id']);
+	$user = get_userdata($invitations[0]['user_id']);
+	$fields['ID'] = $invitations[0]['user_id'];
 
-	//update user and return success message
-	$user_id = wp_update_user($fields);
-	if (is_wp_error($user_id)) {
-		return [['message' => __('There was a problem updating the user'), 'field' => 'slug']];
+	//check to see if user can update or if approval is needed
+	if ($settings['invite_user_link_require_approval']) {
+		return [['message' => __('Thank you. We will review your signup info soon. Once accepted, you can log in and use the site.'), 'field' => 'slug']];
 	} else {
-		return null;
+		//update user and return success message
+		$user_id = invite_user_link_update_user($fields);
+
+		if (is_wp_error($user_id)) {
+			return [['message' => __('There was a problem updating the user'), 'field' => 'slug']];
+		} else {
+			return null;
+		}
 	}
 }
 
