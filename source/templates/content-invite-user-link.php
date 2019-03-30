@@ -7,6 +7,7 @@ global $settings;
 <form action="<?php echo site_url('invite-user-link'); ?>" method="post">
   <input type="hidden" name="pagename" value="invite-user-link" />
   <?php
+  wp_nonce_field('content-invite-user_' . get_query_var('slug'));
   if ($settings['invite_user_link_require_name']):
   ?>
   <div class="form-group">

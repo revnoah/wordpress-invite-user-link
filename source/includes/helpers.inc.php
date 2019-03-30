@@ -99,7 +99,7 @@ function invite_user_link_get_request_vars(array $keys, string $method = 'POST')
 		} elseif (strtoupper($method) == 'GET' && isset($_GET[$key]) && $_GET[$key] != '') {
 			$array[$key] = sanitize_text_field($_GET[$key]);
 		}
-	}
+ 	}
 
 	return $array;
 }

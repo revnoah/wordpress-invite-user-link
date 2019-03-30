@@ -116,20 +116,27 @@ function invite_user_link_finish_signup(string $slug, array $fields): bool {
 	global $wpdb;
 
 	//table setup
-	$table_prefix = $wpdb->prefix;
-	$table_invitations = $table_prefix . 'invite_user_links';
-	$table_invitation_users = $table_prefix . 'invite_user_link_users';
+	$table_invitations = $wpdb->prefix . 'invite_user_links';
+	$table_invitation_users = $wpdb->prefix . 'invite_user_link_users';
 	$query = $wpdb->prepare("SELECT * FROM $table_invitations WHERE slug = %s", $slug);
 	$invitations = $wpdb->get_results($query);
 
-	//TODO: finish validation
+	//verify invitations
+	$verified = invite_user_link_verify_invitation($invitations);
+	if (!$verified) {
+		return [['message' => __('Not verified'), 'field' => 'slug']];
+	}
+
 	//validate the field data
 	$validation_errors = invite_user_link_validate_signup($fields);
 	if (count($validation_errors) > 0) {
-		//TODO: implement flash messaging
-		return false;
+		return $validation_errors;
 	}
-	
+
+	//user id
+	$user = get_user_by('id', $invitations[0]['user_id']);
+
+	//TODO: update user and return success message
 }
 
 /**
@@ -144,29 +151,38 @@ function invite_user_link_validate_signup(array $fields): array {
 	$min_name = 4;
 	$errors = [];
 
-	if ($settings['invite_user_link_require_email_address'] && !is_email($fields['email'])) {
+	//handle nonce
+	if (in_array('_wpnonce', array_keys($fields)) && in_array('slug', array_keys($fields))) {
+		wp_verify_nonce($fields['_wpnonce'], 'content-invite-user_'.$fields['slug']);
+	}
+
+	if ($settings['invite_user_link_require_email_address'] 
+		&& !is_email($fields['email'])) {
 		$errors[] = [
 			'field' => 'email',
 			'message' => __('You must provide a valid email address')
 		];
 	}
 
-	if ($setting['invite_user_link_require_name'] && strlen($fields['name']) < $min_name) {
+	if ($settings['invite_user_link_require_name'] 
+		&& strlen($fields['name']) < $min_name) {
 		$errors[] = [
 			'field' => 'name',
 			'message' => __('You must provide a name with at least ' . $min_name . ' characters')
 		];
 	}	
 
-	if ($setting['invite_user_link_require_password'] && strlen($fields['password']) < $min_name) {
+	if ($settings['invite_user_link_require_password'] 
+		&& strlen($fields['password']) < $min_name) {
 		$errors[] = [
 			'field' => 'password',
 			'message' => __('You must provide a password with at least ' . $min_name . ' characters')
 		];
 	}	
 
-	if ($setting['invite_user_link_require_password'] && $fields['password'] != $fields['password2']) {
-		$errors[] = [
+	if ($settings['invite_user_link_require_password'] 
+		&& $fields['password'] != $fields['password2']) {
+			$errors[] = [
 			'field' => 'password2',
 			'message' => __('You must type the same password twice')
 		];
@@ -185,7 +201,7 @@ function invite_user_link_validate_signup(array $fields): array {
 /**
  * Verify invitation
  *
- * @param array $invitation
+ * @param array $invitation invitation array
  * @return boolean
  */
 function invite_user_link_verify_invitation(array $invitation): bool {
@@ -211,7 +227,7 @@ function invite_user_link_verify_invitation(array $invitation): bool {
 /**
  * Decrement max_invites
  *
- * @param array $invitation
+ * @param array $invitation invitation array
  * @return boolean
  */
 function invite_user_link_decrement_invitation(array $invitation): bool {

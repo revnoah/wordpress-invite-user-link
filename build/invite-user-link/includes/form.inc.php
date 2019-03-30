@@ -72,13 +72,17 @@ function invite_user_link_get_field(array $setting): string {
 /**
  * Get form open
  *
- * @param string $id
- * @param array $hidden_vars
- * @param string $action
+ * @param string $id          form id
+ * @param array  $hidden_vars hidden variables to add to form
+ * @param string $action      php route to post the action to
  * @return string
  */
-function invite_user_link_get_form_open(string $id = '', array $hidden_vars = [], string $action = 'index.php'): string {
-	$output = '<form method="post" action="' . $action . '"';
+function invite_user_link_get_form_open(
+	string $id = '', 
+	array $hidden_vars = [], 
+	string $action = 'invite-user-link'
+	): string {
+	$output = '<form method="post" action="' . site_url($action) . '"';
 	if ($id !== '') {
 		$output .= ' id="' . $id . '"';
 	}
@@ -86,7 +90,8 @@ function invite_user_link_get_form_open(string $id = '', array $hidden_vars = []
 
 	if (count($hidden_vars)) {
 		foreach($hidden_vars as $key => $hidden_var) {
-			$output .= '<input type="hidden" name="' . $key . '" value="' . $hidden_var . '" />' . "\n";
+			$output .= '<input type="hidden" name="' . 
+				$key . '" value="' . $hidden_var . '" />' . "\n";
 		}
 	}
 
@@ -107,7 +112,7 @@ function invite_user_link_get_form_close(): string {
 /**
  * Get table header with optional header row
  *
- * @param array $rows
+ * @param array $rows optional columns for header row
  * @return string
  */
 function invite_user_link_get_table_header(array $rows = []): string {

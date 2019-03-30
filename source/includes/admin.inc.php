@@ -54,7 +54,10 @@ function invite_user_link_settings_saved(): array {
 	$settings_defaults = invite_user_link_settings_defaults();
 
 	foreach ($settings_defaults as $setting) {
-		$settings_saved[$setting['id']] = get_option($setting['id'], $setting['default']);
+		$settings_saved[$setting['id']] = get_option(
+			$setting['id'], 
+			$setting['default']
+		);
 	}
 
 	return $settings_saved;

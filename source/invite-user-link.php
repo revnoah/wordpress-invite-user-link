@@ -144,12 +144,24 @@ function invite_user_link_catch_vars() {
 
 	//TODO: handle multiple routes, actions or pagenames
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		//load variables to pass into template
+		global $settings;
+		global $errors;
+
+		$settings = invite_user_link_settings_saved();
+
 		//get defined keys from post and finish signup with data
-		$keys = ['name', 'email', 'password', 'password2'];
+		$keys = ['name', 'email', 'password', 'password2', 'slug', '_wpnonce', '_wp_http_referer'];
 		$account = invite_user_link_get_request_vars($keys, 'POST');
 
 		//finish signup with supplied fields
-		invite_user_link_finish_signup($slug, $account);
+		$errors = invite_user_link_finish_signup($slug, $account);
+
+		//handle errors and redirect back to page
+		if (count($errors) > 0) {
+			$template_name = 'page-' . PAGENAME . '.php';
+			$template_path = invite_user_link_locate_template([$template_name], true);
+		}
 	} else {
 		//load variables to pass into template
 		global $settings;
