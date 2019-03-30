@@ -111,7 +111,7 @@ function invite_user_link_invite(): void {
  * @param array $fields
  * @return boolean
  */
-function invite_user_link_finish_signup(string $slug, array $fields): bool {
+function invite_user_link_finish_signup(string $slug, array $fields): ?array {
 	//get user and invite related to the slug
 	global $wpdb;
 
@@ -136,7 +136,13 @@ function invite_user_link_finish_signup(string $slug, array $fields): bool {
 	//user id
 	$user = get_user_by('id', $invitations[0]['user_id']);
 
-	//TODO: update user and return success message
+	//update user and return success message
+	$user_id = wp_update_user($fields);
+	if (is_wp_error($user_id)) {
+		return [['message' => __('There was a problem updating the user'), 'field' => 'slug']];
+	} else {
+		return null;
+	}
 }
 
 /**

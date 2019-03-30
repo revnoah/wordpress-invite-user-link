@@ -103,3 +103,45 @@ function invite_user_link_get_request_vars(array $keys, string $method = 'POST')
 
 	return $array;
 }
+
+/**
+ * Update user
+ *
+ * @param array $fields
+ * @return boolean
+ */
+function invite_user_link_update_user(array $fields): bool {
+	$user = [];
+
+	//update user password
+	if ($fields['password']) {
+		$user['user_pass'] = $fields['password'];
+	}
+
+	//update email address
+	if ($fields['email']) {
+		$user['user_email'] = $fields['email'];
+	}
+
+	//update user login name
+	if ($fields['username']) {
+		$user['user_login'] = $fields['username'];
+	}
+
+	//update names
+	if ($fields['name']) {
+		$user['display_name'] = $fields['name'];
+		if (stristr($fields['name'], ' ')) {
+			$field_parts = explode(' ', $fields['name']);
+			$user['last_name'] = array_pop($field_parts);
+			$user['first_name'] = implode(' ', $field_parts);
+		}
+	}
+
+	//no fields to update
+	if (count($user) == 0) {
+		return false;
+	}
+
+	return wp_update_user($fields);
+}
