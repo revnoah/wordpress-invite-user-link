@@ -21,7 +21,7 @@ function invite_user_link_settings_defaults() {
 			'default' => false
 		], [
 			'id' => 'invite_user_link_require_password',
-			'label' => __('Require Email Address'),
+			'label' => __('Require Password'),
 			'description' => __('Require that a user set a password'),
 			'type' => 'boolean',
 			'default' => true
@@ -40,6 +40,20 @@ function invite_user_link_settings_defaults() {
 			'default' => false
 		]
 	];
+
+	return $settings;
+}
+
+/**
+ * Get settings, returning supplied settings
+ *
+ * @param array|null $settings
+ * @return array
+ */
+function invite_user_link_get_settings(?array $settings): array {
+	if (is_null($settings)) {
+		$settings = invite_user_link_settings_saved();
+	}
 
 	return $settings;
 }

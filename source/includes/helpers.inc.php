@@ -44,7 +44,7 @@ function invite_user_link_locate_template(
 		bool $load = false, 
 		bool $require_once = true 
 	):string {
-    $located = '';
+	$located = '';
 
 	//loop through templates
 	foreach ((array)$template_names as $template_name) {
@@ -77,9 +77,9 @@ function invite_user_link_locate_template(
 	//load template
 	if ($load && $located != '') {
 		load_template($located, $require_once);
-    }
+	}
 
-    return $located;
+	return $located;
 }
 
 /**
@@ -99,7 +99,7 @@ function invite_user_link_get_request_vars(array $keys, string $method = 'POST')
 		} elseif (strtoupper($method) == 'GET' && isset($_GET[$key]) && $_GET[$key] != '') {
 			$array[$key] = sanitize_text_field($_GET[$key]);
 		}
- 	}
+	}
 
 	return $array;
 }
@@ -143,7 +143,9 @@ function invite_user_link_update_user(array $fields): bool {
 		invite_user_link_set_hash_password($fields['password'], $fields['ID']);
 	}
 
-	return wp_update_user($fields);
+	$user_updated = wp_update_user($fields);
+
+	return $user_updated;
 }
 
 /**

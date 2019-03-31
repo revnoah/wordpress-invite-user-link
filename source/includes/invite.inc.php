@@ -15,7 +15,7 @@ function invite_user_link_invite_fields() {
 		'settings' => [[
 			'id' => 'invite_user_link_number_users',
 			'label' => __('Number Of Users To Create'),
-			'description' => __('Number of users to use a single link.'),
+			'description' => __('Number of users to use a single signup link.'),
 			'type' => 'number',
 			'default' => '1',
 			'min' => '1'
@@ -92,7 +92,7 @@ function invite_user_link_invite(): void {
 	);
 	$output .= invite_user_link_get_table_header();
 	foreach ($settings['settings'] as $setting) {
-		$setting['saved'] = $setting['default'];
+		$setting['saved'] = isset($setting['default']) ? $setting['default'] : null;
 		$output .= invite_user_link_get_formatted_field($setting);
 	}
 	$output .= invite_user_link_get_table_footer();
@@ -127,7 +127,9 @@ function invite_user_link_finish_signup(string $slug, array $fields): ?array {
 	//verify invitations
 	$verified = invite_user_link_verify_invitation($invitations);
 	if (!$verified) {
-		return [['message' => __('Not verified'), 'field' => 'slug']];
+		$response = [['message' => __('Not verified'), 'field' => 'slug']];
+
+		return $response;
 	}
 
 	//validate the field data
@@ -142,13 +144,17 @@ function invite_user_link_finish_signup(string $slug, array $fields): ?array {
 
 	//check to see if user can update or if approval is needed
 	if ($settings['invite_user_link_require_approval']) {
-		return [['message' => __('Thank you. We will review your signup info soon. Once accepted, you can log in and use the site.'), 'field' => 'slug']];
+		$response = [['message' => __('Thank you. We will review your signup info soon. Once accepted, you can log in and use the site.'), 'field' => 'slug']];
+
+		return $response;
 	} else {
 		//update user and return success message
 		$user_id = invite_user_link_update_user($fields);
 
 		if (is_wp_error($user_id)) {
-			return [['message' => __('There was a problem updating the user'), 'field' => 'slug']];
+			$response = [['message' => __('There was a problem updating the user'), 'field' => 'slug']];
+
+			return $response;
 		} else {
 			return null;
 		}
@@ -164,7 +170,7 @@ function invite_user_link_finish_signup(string $slug, array $fields): ?array {
 function invite_user_link_validate_signup(array $fields): array {
 	//load settings
 	$settings = invite_user_link_settings_saved();
-	$min_name = 4;
+	$min_length = 4;
 	$errors = [];
 
 	//handle nonce
@@ -172,44 +178,11 @@ function invite_user_link_validate_signup(array $fields): array {
 		wp_verify_nonce($fields['_wpnonce'], 'content-invite-user_'.$fields['slug']);
 	}
 
-	if ($settings['invite_user_link_require_email_address'] 
-		&& !is_email($fields['email'])) {
-		$errors[] = [
-			'field' => 'email',
-			'message' => __('You must provide a valid email address')
-		];
-	}
-
-	if ($settings['invite_user_link_require_name'] 
-		&& strlen($fields['name']) < $min_name) {
-		$errors[] = [
-			'field' => 'name',
-			'message' => __('You must provide a name with at least ' . $min_name . ' characters')
-		];
-	}	
-
-	if ($settings['invite_user_link_require_password'] 
-		&& strlen($fields['password']) < $min_name) {
-		$errors[] = [
-			'field' => 'password',
-			'message' => __('You must provide a password with at least ' . $min_name . ' characters')
-		];
-	}	
-
-	if ($settings['invite_user_link_require_password'] 
-		&& $fields['password'] != $fields['password2']) {
-			$errors[] = [
-			'field' => 'password2',
-			'message' => __('You must type the same password twice')
-		];
-	}	
-
-	if ($fields['slug'] == '') {
-		$errors[] = [
-			'field' => 'slug',
-			'message' => __('You need to provide an invitation code')
-		];
-	}	
+	//validate fields and get errors
+	$errors[] = invite_user_link_validate_email($fields['email'], $settings);
+	$errors[] = invite_user_link_validate_name($fields['name'], $settings, $min_length);
+	$errors[] = invite_user_link_validate_password($fields['password'], $fields['password2'], $settings, $min_length);
+	$errors[] = invite_user_link_validate_slug($fields['slug']);
 
 	return $errors;
 }
@@ -240,6 +213,33 @@ function invite_user_link_verify_invitation(array $invitation): bool {
 	return true;
 }
 
+function invite_user_link_add_invitation(array $invitation): bool {
+	global $wpdb;
+	
+	$table_invitations = $wpdb->prefix . 'invite_user_links';
+
+	//handle slug if passed in
+	if (isset($invitation['slug']) && $invitation['slug'] != '') {
+		$slug = $invitation['slug'];
+	} else {
+		$slug = wp_generate_password();
+	}
+
+	//format data for insert
+	$data = [
+		'slug' => $slug,
+		'max_invites' => $invitation['invite_user_link_number_users'],
+		'require_email_address' => boolval($invitation['invite_user_link_require_email_address']),
+		'require_email_verification' => boolval($invitation['invite_user_link_require_email_verification']),
+		'require_approval' => boolval($invitation['invite_user_link_require_email_address'])
+	];
+
+	//create invitation in table
+	$wpdb->insert($table_invitations, $data);
+
+	return false;
+}
+
 /**
  * Decrement max_invites
  *
@@ -247,8 +247,12 @@ function invite_user_link_verify_invitation(array $invitation): bool {
  * @return boolean
  */
 function invite_user_link_decrement_invitation(array $invitation): bool {
+	global $wpdb;
+
 	//check max invites
 	if ($invitation->max_invites > 1) {
+		$table_invitations = $wpdb->prefix . 'invite_user_links';
+
 		$wpdb->query($wpdb->prepare(
 			"UPDATE $table_invitations SET max_invites = max_invites - 1 WHERE ID = %d", 
 			$invitation->ID

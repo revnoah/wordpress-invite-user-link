@@ -6,11 +6,11 @@
  */
 function invite_user_link_create_db() {
 	global $wpdb;
-	$version = get_option( 'householdphotos_version', '1.0.1' );
+	$version = get_option( 'householdphotos_version', '1.0.2' );
 	$charset_collate = $wpdb->get_charset_collate();
-	$table_prefix = $wpdb->prefix;
-  $table_invitations = $table_prefix . 'invite_user_links';
-  $table_invitation_users = $table_prefix . 'invite_user_link_users';
+  $table_invitations = $wpdb->prefix . 'invite_user_links';
+  $table_invitation_users = $wpdb->prefix . 'invite_user_link_users';
+  $table_invitation_user_temp = $wpdb->prefix . 'invite_user_link_user_temp';
 
 	$sql = "CREATE TABLE $table_invitations (
 		ID bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -38,6 +38,17 @@ function invite_user_link_create_db() {
     CONSTRAINT fk_invite_user_links_invitation_id
       FOREIGN KEY (invitation_id)
       REFERENCES {$table_invitations}(ID)
+      ON DELETE CASCADE    
+  ) $charset_collate;
+  CREATE TABLE $table_invitation_user_temp (
+    ID bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    invitation_id bigint(20) unsigned NULL,
+    serialized_data MEDIUMTEXT NOT NULL DEFAULT 0,
+    created timestamp DEFAULT CURRENT_TIMESTAMP,
+		UNIQUE KEY id (ID),
+    CONSTRAINT fk_invite_user_links_temp_invitation_id
+      FOREIGN KEY (invitation_id)
+      REFERENCES {$table_invitation_users}(ID)
       ON DELETE CASCADE    
   ) $charset_collate;";
 

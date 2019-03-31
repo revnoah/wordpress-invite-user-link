@@ -16,7 +16,7 @@ get_header(); ?>
 <div id="primary" class="content-area">
 	<main id="main" class="site-main" role="main">
 
-    <article class="post type-post status-publish format-standard hentry category-uncategorized entry">
+	<article class="post type-post status-publish format-standard hentry category-uncategorized entry">
 			<header class="entry-header">
 				<h2 class="entry-title">Finish Signup</h2>
 			</header>

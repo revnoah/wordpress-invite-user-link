@@ -24,18 +24,19 @@
     <!-- Linux linebreaks -->
     <rule ref="Generic.Files.LineEndings"/>
 
-    <!-- Try for 80 columns but allow up to 160 -->
+    <!-- Try for 160 columns but allow up to 240 -->
     <rule ref="Generic.Files.LineLength">
         <properties>
-            <property name="absoluteLineLimit" value="160"/>
+            <property name="lineLimit" value="160"/>
+            <property name="absoluteLineLimit" value="240"/>
         </properties>
     </rule>
 
     <!-- When a function becomes too complex, it should be refactored -->
     <rule ref="Generic.Metrics.CyclomaticComplexity">
         <properties>
-            <property name="complexity" value="4"/>
-            <property name="absoluteComplexity" value="6"/>
+            <property name="complexity" value="6"/>
+            <property name="absoluteComplexity" value="8"/>
         </properties>
     </rule>
 
@@ -62,7 +63,6 @@
     <rule ref="MySource.PHP.ReturnFunctionValue"/>
 
     <!-- Rules for function doc blocks and inline comments -->
-    <rule ref="PEAR.Commenting.FunctionComment"/>
     <rule ref="PEAR.Commenting.InlineComment"/>
 
     <!-- White space -->

@@ -1,3 +1,9 @@
+= 1.0.2 =
+* form enhancements
+* added temp table for storing user onboarding data
+* added form functions
+* added validation functions
+
 = 1.0.1 =
 * bug fixes and minor updates to create db
 

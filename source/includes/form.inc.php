@@ -88,10 +88,13 @@ function invite_user_link_get_form_open(
 	}
 	$output .= '>' . "\n";
 
+	//add hidden field for form action
+	$output .= '<input type="hidden" name="action" value="' . $id . '" />' . "\n";
+
+	//add custom hidden fields
 	if (count($hidden_vars)) {
 		foreach($hidden_vars as $key => $hidden_var) {
-			$output .= '<input type="hidden" name="' . 
-				$key . '" value="' . $hidden_var . '" />' . "\n";
+			$output .= '<input type="hidden" name="' . $key . '" value="' . $hidden_var . '" />' . "\n";
 		}
 	}
 
@@ -150,7 +153,7 @@ function invite_user_link_get_table_footer(): string {
  */
 function invite_user_link_get_heading($heading): string {
 	//close table
-	$output .= invite_user_link_get_table_footer();
+	$output = invite_user_link_get_table_footer();
 
 	//display header
 	$output .= '<h1>' . $heading['label'] . '</h1>';

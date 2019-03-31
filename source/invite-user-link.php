@@ -1,7 +1,7 @@
 <?php
 /**
  * @package InviteUserLink
- * @version 1.0.1
+ * @version 1.0.2
  */
 
 /*
@@ -107,7 +107,7 @@ add_filter('query_vars', 'invite_user_link_query_vars');
  * @param array $vars Query vars
  * @return array
  */
-function invite_user_link_query_vars($vars) {
+function invite_user_link_query_vars(array $vars): array {
   $vars[] = 'slug';
 
   return $vars;
@@ -121,7 +121,7 @@ add_action('template_redirect', 'invite_user_link_catch_vars');
  *
  * @return void
  */
-function invite_user_link_catch_vars() {
+function invite_user_link_catch_vars(): void {
 	global $wpdb, $wp_query;
 	$current_user = wp_get_current_user();
 	$template_file = '';
@@ -148,14 +148,11 @@ function invite_user_link_catch_vars() {
 		global $settings;
 		global $errors;
 
+		//load setting with defaults
 		$settings = invite_user_link_settings_saved();
 
-		//get defined keys from post and finish signup with data
-		$keys = ['name', 'email', 'password', 'password2', 'slug', '_wpnonce', '_wp_http_referer'];
-		$account = invite_user_link_get_request_vars($keys, 'POST');
-
-		//finish signup with supplied fields
-		$errors = invite_user_link_finish_signup($slug, $account);
+		//handle action and get any errors
+		$errors = invite_user_link_handle_action($_POST);
 
 		//handle errors and redirect back to page
 		if (count($errors) > 0) {
@@ -173,3 +170,78 @@ function invite_user_link_catch_vars() {
 	}
 }
 
+/**
+ * Handle action as set in post vars
+ *
+ * @param array $post_vars
+ * @return array
+ */
+function invite_user_link_handle_action(array $post_vars): array {
+	$errors = [];
+
+	switch ($post_vars['action']) {
+		case 'invite_user_link_invite':
+			$errors = invite_user_link_action_invite();
+			break;
+		case 'invite_user_link_signup':
+			$slug = $post_vars['slug'];
+			$errors = invite_user_link_action_signup($slug);
+			break;
+	}
+
+	return $errors;
+}
+
+/**
+ * Action - Create Invite
+ *
+ * @return void
+ */
+function invite_user_link_action_invite(): array {
+	$errors = [];
+
+	//get defined keys from post and finish signup with data
+	$keys = [
+		'invite_user_link_number_users', 
+		'invite_user_link_expiry_date', 
+		'invite_user_link_require_email_address', 
+		'invite_user_link_require_name', 
+		'_wpnonce', 
+		'_wp_http_referer'
+	];
+	$invitation = invite_user_link_get_request_vars($keys, 'POST');
+
+	//create invitations and get errors
+	$result = invite_user_link_add_invitation($invitation);
+
+	//handle result
+	if (!$result) {
+		$errors[] = [
+			'message' => __('Unable to create invitation')
+		];
+	}
+
+	print_r($errors);
+	die;
+
+	return $errors;
+}
+
+/**
+ * Action - Signup
+ *
+ * @param string $slug
+ * @return array
+ */
+function invite_user_link_action_signup(string $slug): array {
+	$errors = [];
+
+	//get defined keys from post and finish signup with data
+	$keys = ['name', 'email', 'password', 'password2', 'slug', '_wpnonce', '_wp_http_referer'];
+	$account = invite_user_link_get_request_vars($keys, 'POST');
+
+	//finish signup with supplied fields
+	$errors[] = invite_user_link_finish_signup($slug, $account);
+
+	return $errors;
+}
