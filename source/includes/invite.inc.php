@@ -226,6 +226,7 @@ function invite_user_link_add_invitation(array $invitation): bool {
 	}
 
 	//format data for insert
+	$format = ['%s', '%d', '%d', '%d', '%d'];
 	$data = [
 		'slug' => $slug,
 		'max_invites' => $invitation['invite_user_link_number_users'],
@@ -235,7 +236,7 @@ function invite_user_link_add_invitation(array $invitation): bool {
 	];
 
 	//create invitation in table
-	$wpdb->insert($table_invitations, $data);
+	$wpdb->insert($table_invitations, $data, $format);
 
 	return false;
 }
